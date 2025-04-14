@@ -84,9 +84,15 @@ boot_ci
 
 -   How does the latter compare to the 95% CI estimated from your entire dataset?
 
+    -   The CI calculated using bootstrapping is within a 3% margin of the 2.5% end of the calculated CI and within a 1% margin of the 97.5% end of the calculated CI.
+
 ### **EXTRA CREDIT**
 
 Write a FUNCTION that takes as its arguments a dataframe, “d”, a linear model, “m” (as a character string, e.g., “logHR\~logBM”), a user-defined confidence interval level, “conf.level” (with default = 0.95), and a number of bootstrap replicates, “n” (with default = 1000). Your function should return a dataframe that includes: beta coefficient names; beta coefficients, standard errors, and upper and lower CI limits for the linear model based on your entire dataset; and mean beta coefficient estimates, SEs, and CI limits for those coefficients based on your bootstrap.
+
+```{r}
+
+```
 
 ### **EXTRA EXTRA CREDIT**
 
