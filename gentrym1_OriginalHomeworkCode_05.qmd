@@ -41,14 +41,46 @@ print(m1$coefficients)
 
 \[2\] Then, use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each ββ coefficient.
 
-```{r}
-s <- sample_n(df, size = 1000, replace= TRUE)
-
-```
-
 -   Estimate the standard error for each of your ββ coefficients as the standard deviation of the sampling distribution from your bootstrap and determine the 95% CI for each of your ββ coefficients based on the appropriate quantiles from your sampling distribution.
 
+```{r}
+#| label: Bootstrapping
+
+# Set number of bootstraps, n
+n <- 1000
+
+# Store coefficients from each bootstrap
+boot_coefs <- replicate(n, {
+  s <- df %>% sample_frac(replace = TRUE)
+  coef(lm(log(HomeRange_km2) ~ log(Body_mass_female_mean), data = s))
+}, simplify = "matrix")
+
+# Convert to data frame
+boot_df <- as.data.frame(t(boot_coefs))
+colnames(boot_df) <- c("Intercept", "Slope")
+
+# Estimate SEs and CIs
+boot_se <- apply(boot_df, 2, sd)
+boot_ci <- apply(boot_df, 2, quantile, probs = c(0.025, 0.975))
+
+list(SE = boot_se, CI = boot_ci)
+```
+
 -   How does the former compare to the SE estimated from your entire dataset using the formula for standard error implemented in `lm()`?
+
+```{r}
+#| label: Comparing SEs and CIs
+
+print("LM SE:")
+summary(m1)$coefficients[, "Std. Error"]
+print("Bootstraps SE:")
+boot_se
+
+print("LM CI:")
+confint(m1)
+print("Bootstraps CI: ")
+boot_ci
+```
 
 -   How does the latter compare to the 95% CI estimated from your entire dataset?
 
