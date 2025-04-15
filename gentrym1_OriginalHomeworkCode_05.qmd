@@ -91,7 +91,37 @@ boot_ci
 Write a FUNCTION that takes as its arguments a dataframe, “d”, a linear model, “m” (as a character string, e.g., “logHR\~logBM”), a user-defined confidence interval level, “conf.level” (with default = 0.95), and a number of bootstrap replicates, “n” (with default = 1000). Your function should return a dataframe that includes: beta coefficient names; beta coefficients, standard errors, and upper and lower CI limits for the linear model based on your entire dataset; and mean beta coefficient estimates, SEs, and CI limits for those coefficients based on your bootstrap.
 
 ```{r}
+#| label: Bonus 1: Function
 
+boots_model <- function(d, m, conf.level = 0.95, n = 1000){
+  # convert string to formula
+  m <- as.formula(m)
+  
+  # create model using formula and data parameters
+  model <- lm(m, data = d)
+  model_sm <- tidy(model, conf.int = TRUE, conf.level = conf.level)
+  
+  boot_coefs <- replicate(n, {
+  s <- df %>% sample_frac(replace = TRUE)
+  coef(lm(m, data = s))
+}, simplify = "matrix")
+  
+  boot_df <- as.data.frame(t(boot_coefs))
+colnames(boot_df) <- model_sm$term
+  boot_sm <- boot_df %>% 
+    summarise(across(everything(), list(
+      mean = mean,
+      se = sd, 
+      lower = ~ quantile(.x, (1-conf.level)/2),
+      upper = ~ quantile(.x, 1 - (1 - conf.level)/2)),
+      .names = "{.col}_{.fn}"))
+  
+  summary <- bind_cols(
+    model_sm %>% select(term, estimate, std.error, conf.low, conf.high), boot_sm
+  )
+  
+  return(summary)
+}
 ```
 
 ### **EXTRA EXTRA CREDIT**
