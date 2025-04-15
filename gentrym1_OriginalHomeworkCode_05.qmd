@@ -148,6 +148,10 @@ slope_est <- map_df(boots, function(n) {
 ggplot(slope_est, aes(x = n, y = mean)) +
   geom_line(color = "blue") +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, fill = "blue") +
-  geom_hline(yintercept = coef(m1)[2], linetype = "dashed", color = "red")
-
+  geom_hline(yintercept = coef(m1)[2], linetype = "dashed", color = "red") + 
+  labs(
+    title = "Bootstrap CI Convergence for Slope Coefficient",
+    x = "Number of Bootstraps",
+    y = "Slope Estimate"
+  ) + theme_bw()
 ```
