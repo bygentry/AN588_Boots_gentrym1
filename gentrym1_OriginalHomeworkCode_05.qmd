@@ -127,3 +127,27 @@ colnames(boot_df) <- model_sm$term
 ### **EXTRA EXTRA CREDIT**
 
 Graph each beta value from the linear model and its corresponding mean value, lower CI and upper CI from a bootstrap as a function of number of bootstraps from 10 to 200 by 10s. HINT: the beta value from the linear model will be the same for all bootstraps and the mean beta value may not differ that much!
+
+```{r}
+#| label: Bonus 2: Graphing
+
+boots <- seq(10, 200, by = 10)
+slope_est <- map_df(boots, function(n) {
+  coefs <- replicate(n, {
+    s <- df %>% sample_frac(replace = TRUE)
+    coef(lm(log(range) ~ log(f_mass), data = s))[2]
+  })
+  tibble(
+    n = n,
+    mean = mean(coefs),
+    lower = quantile(coefs, 0.025),
+    upper = quantile(coefs, 0.975)
+  )
+})
+
+ggplot(slope_est, aes(x = n, y = mean)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, fill = "blue") +
+  geom_hline(yintercept = coef(m1)[2], linetype = "dashed", color = "red")
+
+```
