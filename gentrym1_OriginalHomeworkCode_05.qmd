@@ -1,26 +1,22 @@
 ---
 title: "Boots!"
+subtitle: "Bootstrapping Standard Errors and CIs for Linear Models"
 author: "Gentry M"
 format: 
   html:
-    theme: cayman
     toc: true
-    toc-depth: 2
     toc-location: left
+    theme: minty
     df-print: kable
-    style: css
 editor: visual
 ---
 
-### Bootstrapping Standard Errors and CIs for Linear Models.
-
-When we initially discussed the central limit theorem and confidence intervals, we showed how we could use bootstrapping to estimate standard errors and confidence intervals around certain parameter values, like the mean. Using bootstrapping, we could also do the same for estimating standard errors and CIs around regression parameters, such as β coefficients.
-
-\[1\] Using the “KamilarAndCooperData.csv” dataset, run a linear regression looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean) and report your coeffiecients (slope and intercept).
+## Preliminaries
 
 ```{r}
-#| label: Packages and Data
+#| label: Packages
 #| message: false
+#| code-fold: true
 
 library(curl)
 library(manipulate)
@@ -28,11 +24,24 @@ library(ggplot2)
 library(broom)
 library(lmtest)
 library(tidyverse)
+```
+
+```{r}
+#| label: Data
+#| code-fold: show
 
 d <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/refs/heads/master/AN588_Spring25/KamilarAndCooperData.csv")
 df <- read.csv(d, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 head(df)
 ```
+
+## Introduction
+
+When we initially discussed the central limit theorem and confidence intervals, we showed how we could use bootstrapping to estimate standard errors and confidence intervals around certain parameter values, like the mean. Using bootstrapping, we could also do the same for estimating standard errors and CIs around regression parameters, such as β coefficients.
+
+## Challenge 1
+
+Using the “KamilarAndCooperData.csv” dataset, run a linear regression looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean) and report your coeffiecients (slope and intercept).
 
 ```{r}
 #| label: Linear Regression
@@ -48,7 +57,9 @@ m1 <- lm(log(range) ~ log(f_mass), data = df)
 print(m1$coefficients)
 ```
 
-\[2\] Then, use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each ββ coefficient.
+## Challenge 2
+
+Then, use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each ββ coefficient.
 
 -   Estimate the standard error for each of your ββ coefficients as the standard deviation of the sampling distribution from your bootstrap and determine the 95% CI for each of your ββ coefficients based on the appropriate quantiles from your sampling distribution.
 
@@ -81,18 +92,16 @@ list(SE = boot_se, CI = boot_ci)
 #| label: Comparing SEs and CIs
 #| code-fold: true
 
-"LM SE:"; summary(m1)$coefficients[, "Std. Error"]
-"Bootstraps SE:"; boot_se
-
-"LM CI:"; confint(m1)
-"Bootstraps CI:"; boot_ci
+list(LM.SE =summary(m1)$coefficients[, "Std. Error"], Boot.SE = boot_se); list(LM.CI = confint(m1), Boot.CI = boot_ci)
 ```
 
 -   How does the latter compare to the 95% CI estimated from your entire dataset?
 
     -   The CI calculated using bootstrapping is within a 3% margin of the 2.5% end of the calculated CI and within a 1% margin of the 97.5% end of the calculated CI.
 
-### **EXTRA CREDIT**
+## Extra Credit
+
+### EC1
 
 Write a FUNCTION that takes as its arguments a dataframe, “d”, a linear model, “m” (as a character string, e.g., “logHR\~logBM”), a user-defined confidence interval level, “conf.level” (with default = 0.95), and a number of bootstrap replicates, “n” (with default = 1000). Your function should return a dataframe that includes: beta coefficient names; beta coefficients, standard errors, and upper and lower CI limits for the linear model based on your entire dataset; and mean beta coefficient estimates, SEs, and CI limits for those coefficients based on your bootstrap.
 
@@ -130,7 +139,7 @@ colnames(boot_df) <- model_sm$term
 }
 ```
 
-### **EXTRA EXTRA CREDIT**
+### EC2
 
 Graph each beta value from the linear model and its corresponding mean value, lower CI and upper CI from a bootstrap as a function of number of bootstraps from 10 to 200 by 10s. HINT: the beta value from the linear model will be the same for all bootstraps and the mean beta value may not differ that much!
 
